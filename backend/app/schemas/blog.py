@@ -1,6 +1,9 @@
 from pydantic import BaseModel
+from datetime import date
 
 class BlogPost(BaseModel):
-    title: str
-    content: str
     slug: str
+    title: str
+    summary: str
+    content: str
+    published_at: date
