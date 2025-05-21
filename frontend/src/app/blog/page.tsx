@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 type BlogPost = {
   slug: string;
@@ -12,6 +12,8 @@ type BlogPost = {
 
 export default function BlogPage() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [email, setEmail] = useState("");
+  const [subscribed, setSubscribed] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -22,6 +24,21 @@ export default function BlogPage() {
         setLoading(false);
       });
   }, []);
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const response = await fetch("http://localhost:8000/contact/subscribe", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email }),
+    });
+
+    if (response.ok) {
+      setSubscribed(true);
+    }
+  };
 
   if (loading) return <p className="p-4">Loading blog posts...</p>;
 
@@ -36,7 +53,7 @@ export default function BlogPage() {
           </p>
         </div>
 
-        <form className="space-y-2">
+        <form onSubmit={handleSubscribe} className="space-y-2">
           <label className="block text-sm font-medium" htmlFor="email">
             Subscribe vai email
           </label>
@@ -46,6 +63,8 @@ export default function BlogPage() {
             required
             placeholder="Your email address"
             className="w-full px-4 py-2 border rounded-md bg-background"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
           <button
             type="submit"
@@ -53,6 +72,11 @@ export default function BlogPage() {
           >
             Subscribe
           </button>
+          {subscribed && (
+            <p className="text-sm text-green-600 mt-1">
+              Subscriber successfully!
+            </p>
+          )}
         </form>
       </div>
       <ul className="space-y-4">
