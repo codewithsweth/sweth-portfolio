@@ -3,9 +3,9 @@ from app.schemas.auth import LoginRequest
 from datetime import datetime, timedelta, timezone
 import os, jwt
 
-router = APIRouter(prefix="/auth", tag=["Auth"])
+router = APIRouter(prefix="/auth", tags=["Auth"])
 
-@router.get("/login")
+@router.post("/login")
 def Login(request: LoginRequest):
     if request.email != os.getenv("ADMIN_EMAIL") or request.password != os.getenv("ADMIN_PASSWORD"):
         raise HTTPException(status_code=401, detail="Invalid Credentials")
