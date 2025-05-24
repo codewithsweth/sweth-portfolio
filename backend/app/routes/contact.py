@@ -1,16 +1,27 @@
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, EmailStr
-from app.schemas.contact import ContactMessage
+from app.schemas.contact import ContactMessage, SubscribeRequest
 from app.utils.email import render_email_template, send_email
+import os
 
 router = APIRouter(prefix="/contact", tags=["Contact"])
 
-class SubscribeRequest(BaseModel):
-    email: EmailStr
-
 @router.post("/")
-def send_message(contact: ContactMessage):
-    print(f"New contact from <{contact.email}>: {contact.message}")
+async def send_message(contact: ContactMessage):
+    TO_EMAIL = os.getenv("MAIN_EMAIL")
+    html = render_email_template("email_contact.html", {
+        "name": contact.name,
+        "email": contact.email,
+        "message": contact.message
+    })
+    status, result = await send_email(
+        to_email=TO_EMAIL,
+        subject=f"Contact Form Message from {contact.name}",
+        html_content=html
+    )
+
+    if status != 200:
+        raise HTTPException(status_code=500, detail="Failed to send message")
+    
     return {"message": 'Message received!, Thank you!'}
 
 @router.post("/subscribe")

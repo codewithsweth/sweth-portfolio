@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 type BlogPost = {
   slug: string;
@@ -66,12 +67,13 @@ export default function BlogPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-          <button
+          <Button
             type="submit"
-            className="mt-2 bg-primary text-white px-4 py-2 rounded hover:bg-primary/80"
+            variant={"default"}
+            className="mt-2 rounded cursor-pointer"
           >
             Subscribe
-          </button>
+          </Button>
           {subscribed && (
             <p className="text-sm text-green-600 mt-1">
               Subscriber successfully!
