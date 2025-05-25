@@ -1,3 +1,10 @@
+# Python
 __pycache__/
 *.py[cod]
+*.sqlite3
+*.db
 .env
+venv/
+
+# Alembic
+alembic/versions/*.pyc
