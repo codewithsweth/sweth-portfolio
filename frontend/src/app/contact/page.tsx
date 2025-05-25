@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -32,9 +32,6 @@ export default function ContactPage() {
     if (response.ok) setSubmitted(true);
   };
 
-  useEffect(() => {
-    console.log("formData", formData)
-  }, [formData])
   return (
     <div className="max-w-xl mx-auto p-6 space-y-6">
       <h1 className="text-2xl font-bold text-center">Contact Me</h1>
