@@ -1,35 +1,33 @@
-from fastapi import APIRouter, HTTPException
-from app.schemas.project import Project
+from fastapi import APIRouter, HTTPException, Depends, status
+from app.schemas.project import ProjectCreate, ProjectOut
+from sqlalchemy.orm import Session
+from app.db import get_db
+from app.models.project import Project
+from app.dependencies.auth import get_current_admin
 
 router = APIRouter(prefix="/projects", tags=["Projects"])
 
-# Temp static data
-projects = [
-    Project(
-        id=1,
-        title="DevPort",
-        description="A multi-user portfolio platform",
-        tech_stack=["Next.js", "Tailwind", "FastAPI"],
-        github_url="https://github.com/codewithsweth/portfolio-app",
-        live_url="https://devport.vercel.app"
-    ),
-    Project(
-        id=2,
-        title="WeatherApp",
-        description="Simple app showing weather by city name",
-        tech_stack=["React Native", "Native CLI"],
-        github_url="https://github.com/codewithsweth/taskMangerMobile",
-        live_url=None
+@router.get("/", response_model=list[ProjectOut])
+def get_all_projects(db: Session = Depends(get_db)):
+    return db.query(Project).order_by(Project.id.desc()).all()
+
+@router.get("/{project_id}", response_model=ProjectOut)
+def get_project_by_id(project_id: int, db: Session = Depends(get_db)):
+    project = db.query(Project).filter(Project.id == project_id).first()
+    if not project:
+        raise HTTPException(status_code=401, detail="Project not found")
+    return project
+
+@router.post("/", response_model=ProjectOut, status_code=status.HTTP_201_CREATED,)
+def create_project(project: ProjectCreate, db: Session = Depends(get_db), _: dict = Depends(get_current_admin)):
+    new_project = Project(
+        title=project.title,
+        description=project.description,
+        tech_stack=",".join(project.tech_stack),
+        github_url=project.github_url,
+        live_url=project.live_url,
     )
-]
-
-@router.get("/", response_model=list[Project])
-def get_projects():
-    return projects
-
-@router.get('/{project_id}', response_model=Project)
-def get_project_by_id(project_id: int):
-    for project in projects:
-        if project.id == project_id:
-            return project
-    raise HTTPException(status_code=404, detail="Project not found")
+    db.add(new_project)
+    db.commit()
+    db.refresh(new_project)
+    return new_project

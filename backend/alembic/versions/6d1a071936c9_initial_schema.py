@@ -1,8 +1,8 @@
-"""create projects table
+"""initial schema
 
-Revision ID: cd066218d467
-Revises: 64e07d27e9d0
-Create Date: 2025-05-25 18:04:52.805303
+Revision ID: 6d1a071936c9
+Revises: 
+Create Date: 2025-05-25 21:25:23.239558
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'cd066218d467'
-down_revision: Union[str, None] = '64e07d27e9d0'
+revision: str = '6d1a071936c9'
+down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -27,6 +27,7 @@ def upgrade() -> None:
     sa.Column('description', sa.Text(), nullable=True),
     sa.Column('tech_stack', sa.String(length=300), nullable=True),
     sa.Column('github_url', sa.String(length=300), nullable=True),
+    sa.Column('live_url', sa.String(length=300), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_projects_id'), 'projects', ['id'], unique=False)
