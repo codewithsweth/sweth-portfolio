@@ -9,3 +9,4 @@ class Project(Base):
     description = Column(Text)
     tech_stack = Column(String(300))
     github_url = Column(String(300))
+    live_url = Column(String(300), nullable=True)
