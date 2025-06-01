@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import API from "@/lib/axios";
 import { AxiosError } from "axios";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
-export default function AdminProjectPage() {
+export default function EditProjectForm() {
+  const { id: projectId } = useParams();
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -15,8 +16,22 @@ export default function AdminProjectPage() {
     github_url: "",
     live_url: "",
   });
-  const [error, setError] = useState("");
   const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    API.get(`/projects/${projectId}`)
+      .then((res) => {
+        const project = res.data;
+        setForm({
+          ...project,
+          tech_stack: project.tech_stack.join(","),
+        });
+      })
+      .catch((err) => console.error(err))
+      .finally(() => setLoading(false));
+  }, [projectId]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -27,25 +42,29 @@ export default function AdminProjectPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-
     try {
       const payload = {
         ...form,
         tech_stack: form.tech_stack.split(",").map((tech) => tech.trim()),
       };
-      const response = await API.post("/projects/", payload);
-      if (response.status === 201) {
+      const response = await API.put(`/projects/${projectId}`, payload);
+      if (response.status === 200) {
         router.push("/admin/projects");
       }
     } catch (error) {
-      const axiosError = error as AxiosError<{ detail: string }>;
-      const msg = axiosError.response?.data?.detail || "Failed to add project";
+      const axiosError = error as AxiosError<{
+        detail: Array<{ msg: string }>;
+      }>;
+      const msg =
+        axiosError.response?.data?.detail[0].msg || "Failed to edit project";
       setError(msg);
     }
   };
+
+  if (loading) return <p>Loading...</p>;
   return (
     <div className="max-w-xl mx-auto p-6 space-y-4">
-      <h1 className="text-2xl font-bold">Add New Project</h1>
+      <h1 className="text-2xl font-bold">Update Project</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
           name="title"
@@ -82,10 +101,9 @@ export default function AdminProjectPage() {
           value={form.live_url}
           onChange={handleChange}
           placeholder="Live URL (optional)"
-          required
         />
         {error && <p className="text-center text-red-500">{error}</p>}
-        <Button type="submit">Add Project</Button>
+        <Button type="submit">Update</Button>
       </form>
     </div>
   );

@@ -18,7 +18,7 @@ def get_project_by_id(project_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Project not found")
     return project
 
-@router.post("/", response_model=ProjectOut, status_code=status.HTTP_201_CREATED,)
+@router.post("/", response_model=ProjectOut, status_code=status.HTTP_201_CREATED)
 def create_project(project: ProjectCreate, db: Session = Depends(get_db), _: dict = Depends(get_current_admin)):
     new_project = Project(
         title=project.title,
@@ -31,3 +31,29 @@ def create_project(project: ProjectCreate, db: Session = Depends(get_db), _: dic
     db.commit()
     db.refresh(new_project)
     return new_project
+
+@router.delete('/{project_id}', status_code=status.HTTP_204_NO_CONTENT)
+def delete_project(project_id: int, db: Session = Depends(get_db), _: dict = Depends(get_current_admin)):
+    project = db.query(Project).filter(Project.id == project_id).first()
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    db.delete(project)
+    db.commit()
+    return
+
+
+@router.put('/{project_id}', response_model=ProjectOut)
+def update_project(project_id: int, updated: ProjectCreate, db: Session = Depends(get_db), _: dict = Depends(get_current_admin)):
+    project = db.query(Project).filter(Project.id == project_id).first()
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    
+    project.title = updated.title
+    project.description = updated.description
+    project.tech_stack = ','.join(updated.tech_stack)
+    project.github_url = updated.github_url
+    project.live_url = updated.live_url
+
+    db.commit()
+    db.refresh(project)
+    return project

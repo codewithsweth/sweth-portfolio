@@ -1,8 +1,8 @@
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, Field
 from typing import List
 
 class ProjectCreate(BaseModel):
-    title: str
+    title: str = Field(..., min_length=1)
     description: str
     tech_stack: List[str]
     github_url: str
