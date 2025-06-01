@@ -3,6 +3,9 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import API from "@/lib/axios";
+import toast from "react-hot-toast";
+import { AxiosError } from "axios";
 
 type BlogPost = {
   slug: string;
@@ -14,7 +17,7 @@ type BlogPost = {
 export default function BlogPage() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [email, setEmail] = useState("");
-  const [subscribed, setSubscribed] = useState(false);
+  // const [subscribed, setSubscribed] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -28,16 +31,17 @@ export default function BlogPage() {
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
-    const response = await fetch("http://localhost:8000/contact/subscribe", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email }),
-    });
-
-    if (response.ok) {
-      setSubscribed(true);
+    const payload = JSON.stringify({ email });
+    try {
+      const response = await API.post("/contact/subscribe", payload);
+      if (response.status === 200) {
+        toast.success("Subscriber successfully!");
+        setEmail("");
+        // setSubscribed(true);
+      }
+    } catch (error) {
+      const axiosError = error as AxiosError<{ detail: string }>;
+      toast.error(axiosError.response?.data.detail || "Failed to send email");
     }
   };
 
@@ -74,11 +78,11 @@ export default function BlogPage() {
           >
             Subscribe
           </Button>
-          {subscribed && (
+          {/* {subscribed && (
             <p className="text-sm text-green-600 mt-1">
               Subscriber successfully!
             </p>
-          )}
+          )} */}
         </form>
       </div>
       <ul className="space-y-4">

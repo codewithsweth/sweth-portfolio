@@ -6,6 +6,7 @@ import API from "@/lib/axios";
 import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 export default function AdminProjectPage() {
   const [form, setForm] = useState({
@@ -35,11 +36,13 @@ export default function AdminProjectPage() {
       };
       const response = await API.post("/projects/", payload);
       if (response.status === 201) {
+        toast.success("Project added successfully!");
         router.push("/admin/projects");
       }
     } catch (error) {
       const axiosError = error as AxiosError<{ detail: string }>;
       const msg = axiosError.response?.data?.detail || "Failed to add project";
+      toast.error(msg);
       setError(msg);
     }
   };

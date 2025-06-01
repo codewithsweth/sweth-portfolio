@@ -6,6 +6,7 @@ import API from "@/lib/axios";
 import { AxiosError } from "axios";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 export default function EditProjectForm() {
   const { id: projectId } = useParams();
@@ -49,6 +50,7 @@ export default function EditProjectForm() {
       };
       const response = await API.put(`/projects/${projectId}`, payload);
       if (response.status === 200) {
+        toast.success("Project updated successfully!");
         router.push("/admin/projects");
       }
     } catch (error) {
@@ -57,6 +59,7 @@ export default function EditProjectForm() {
       }>;
       const msg =
         axiosError.response?.data?.detail[0].msg || "Failed to edit project";
+      toast.error(msg);
       setError(msg);
     }
   };
