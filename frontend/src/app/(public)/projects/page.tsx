@@ -13,16 +13,16 @@ type Project = {
   live_url?: string;
 };
 
-export default function ProjectsPage() {
+export default function ProjectListPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    API.get("http://localhost:8000/projects").then((response) => {
-      setProjects(response.data);
-      setLoading(false);
-    });
+    API.get("http://localhost:8000/projects")
+      .then((response) => setProjects(response.data))
+      .catch((err) => console.error("Failed to fetch projects:", err))
+      .finally(() => setLoading(false));
   }, []);
 
   if (loading) return <p className="p-4">Loading Projects...</p>;
