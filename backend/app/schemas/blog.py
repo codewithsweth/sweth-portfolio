@@ -1,12 +1,13 @@
 from pydantic import BaseModel
-from datetime import date
+from datetime import datetime
 
 class BlogPost(BaseModel):
     slug: str
     title: str
-    summary: str
+    summary: str | None = None
     content: str
-    published_at: date
+    published: bool = False
+   
 
 class BlogCreate(BlogPost):
     pass
@@ -16,6 +17,7 @@ class BlogUpdate(BlogPost):
 
 class BlogOutput(BlogPost):
     id: int
+    published_at: datetime | None = None
 
     class Config:
         orm_mode = True
