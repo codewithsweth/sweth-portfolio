@@ -7,3 +7,15 @@ class BlogPost(BaseModel):
     summary: str
     content: str
     published_at: date
+
+class BlogCreate(BlogPost):
+    pass
+
+class BlogUpdate(BlogPost):
+    pass
+
+class BlogOutput(BlogPost):
+    id: int
+
+    class Config:
+        orm_mode = True
