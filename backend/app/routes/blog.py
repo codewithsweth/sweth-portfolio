@@ -1,16 +1,16 @@
 from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy.orm import Session
-from app.schemas.blog import BlogPost, BlogOutput, BlogCreate, BlogUpdate
-from datetime import date
+from app.schemas.blog import BlogOutput, BlogCreate, BlogUpdate
 from app.db import get_db
 from app.dependencies.auth import get_current_admin
 from app.models.blog import Blog
+from datetime import datetime
 
 router = APIRouter(prefix="/blog", tags=["Blog"])
 
 @router.get("/", response_model=list[BlogOutput])
 def get_blog_list(db: Session = Depends(get_db)):
-    return db.query(Blog).order_by(Blog.published_at.desc()).all()
+    return db.query(Blog).filter(Blog.published == True).order_by(Blog.published_at.desc()).all()
 
 @router.get("/{slug}", response_model=BlogOutput)
 def get_blog(slug: str, db: Session = Depends(get_db)):
@@ -21,38 +21,37 @@ def get_blog(slug: str, db: Session = Depends(get_db)):
 
 @router.post('/', response_model=BlogOutput, status_code=status.HTTP_201_CREATED)
 def create_blog(post: BlogCreate, db: Session = Depends(get_db), _admin: dict = Depends(get_current_admin)):
-    new_blog = Blog(
-        slug=post.slug,
-        title=post.title,
-        summary=post.summary,
-        content=post.content,
-        published_at=post.published_at
-    )
+    published_at = datetime.now() if post.published else None
+
+    new_blog = Blog(**post.model_dump(), published_at=published_at)
+
     db.add(new_blog)
     db.commit()
     db.refresh(new_blog)
 
     return new_blog
 
-@router.put('/{slug}', response_model=BlogOutput, status_code=status.HTTP_200_OK)
-def update_blog(slug: str, updated: BlogUpdate, db: Session = Depends(get_db), _admin: dict = Depends(get_current_admin)):
-    blog = db.query(Blog).filter(Blog.slug == slug).first()
+@router.put('/{blog_id}', response_model=BlogOutput, status_code=status.HTTP_200_OK)
+def update_blog(blog_id: int, updated: BlogUpdate, db: Session = Depends(get_db), _admin: dict = Depends(get_current_admin)):
+    blog = db.query(Blog).filter(Blog.id == blog_id).first()
     if not blog:
         raise HTTPException(status_code=404, detail="Blog not found")
     
-    blog.slug = updated.slug
-    blog.title = updated.title
-    blog.summary = updated.summary
-    blog.content = updated.content
-    blog.published_at = updated.published_at
+    for field ,value in updated.model_dump().items():
+        setattr(blog, field, value)
+
+    if updated.published and blog.published_at is None:
+        blog.published_at = datetime.now()
+    elif not updated.published:
+        blog.published_at = None
 
     db.commit()
     db.refresh(blog)
     return blog
 
-@router.delete('/{slug}', status_code=status.HTTP_204_NO_CONTENT)
-def delete_blog(slug: str, db: Session = Depends(get_db), _admin: dict = Depends(get_current_admin)):
-    blog = db.query(Blog).filter(Blog.slug == slug).first()
+@router.delete('/{blog_id}', status_code=status.HTTP_204_NO_CONTENT)
+def delete_blog(blog_id: int, db: Session = Depends(get_db), _admin: dict = Depends(get_current_admin)):
+    blog = db.query(Blog).filter(Blog.id == blog_id).first()
     if not blog:
         raise HTTPException(status_code=404, detail="Blog not found")
     
