@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import Image from "next/image";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import { AxiosError } from "axios";
 
 interface Blog {
   id: number;
@@ -36,8 +37,13 @@ export default function ManageBlogs() {
         setBlogs(response.data);
       }
     } catch (error) {
-      console.error(error);
-      toast.error("Failed to fetch blogs", error);
+      const axiosError = error as AxiosError<{ detail: string }>;
+      if (axiosError.response?.status === 401) {
+        toast.error(
+          "Failed to fetch blogs: " + axiosError.response.data.detail
+        );
+        setBlogs([]);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -52,7 +58,12 @@ export default function ManageBlogs() {
         toast.success("Blog deleted successfully");
       }
     } catch (error) {
-      console.error("Error deleting project: ", error);
+      const axiosError = error as AxiosError<{ detail: string }>;
+      if (axiosError.response?.status === 404) {
+        toast.error(
+          "Error deleting project: " + axiosError.response.data.detail
+        );
+      }
     } finally {
       setConfirmOpen(false);
       setSelectedBlogId(null);
@@ -90,7 +101,9 @@ export default function ManageBlogs() {
             <li key={blog.id} className="p-4 border rounded bg-card">
               <div className="flex justify-between items-start">
                 <div>
-                  <h2 className="text-lg font-semibold">{blog.title}</h2>
+                  <Link href={`/admin/blogs/${blog.slug}`}>
+                    <h2 className="text-lg font-semibold hover:underline">{blog.title}</h2>
+                  </Link>
                   <p className="text-sm text-muted-foreground">
                     {blog.published
                       ? `Published on ${blog.published_at}`

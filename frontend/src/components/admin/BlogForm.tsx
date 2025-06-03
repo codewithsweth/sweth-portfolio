@@ -87,7 +87,7 @@ export default function BlogForm({ onSubmit, initialData }: Props) {
   };
 
   return (
-    <form className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <Input
         value={form.slug}
         placeholder="Slug"
@@ -133,7 +133,7 @@ export default function BlogForm({ onSubmit, initialData }: Props) {
         <Label htmlFor="published">Publish</Label>
       </div>
       <div className="flex gap-3">
-        <Button type="submit" onClick={handleSubmit}>
+        <Button type="submit">
           {!initialData ? "Add Blog" : "Update Blog"}
         </Button>
       </div>
