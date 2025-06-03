@@ -5,7 +5,7 @@ from app.db import get_db
 from app.dependencies.auth import get_current_admin
 from app.models.blog import Blog
 
-router = APIRouter(prefix="/blog", tags=["Blog"])
+router = APIRouter(prefix="/blogs", tags=["Blog"])
 
 @router.get("/", response_model=list[BlogOutput])
 def get_blog_list(db: Session = Depends(get_db)):

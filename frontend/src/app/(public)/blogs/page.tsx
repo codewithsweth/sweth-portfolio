@@ -15,18 +15,31 @@ type BlogPost = {
 };
 
 export default function BlogPage() {
-  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [posts, setBlogs] = useState<BlogPost[]>([]);
   const [email, setEmail] = useState("");
-  // const [subscribed, setSubscribed] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchBlogs = async () => {
+    try {
+      const response = await API.get("/blogs/");
+      if (response.status === 200) {
+        setBlogs(response.data);
+      }
+    } catch (error) {
+      const axiosError = error as AxiosError<{ detail: string }>;
+      if (axiosError.response?.status === 401) {
+        toast.error(
+          "Failed to fetch blogs: " + axiosError.response.data.detail
+        );
+        setBlogs([]);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    fetch("http://localhost:8000/blog")
-      .then((response) => response.json())
-      .then((data) => {
-        setPosts(data);
-        setLoading(false);
-      });
+    fetchBlogs();
   }, []);
 
   const handleSubscribe = async (e: React.FormEvent) => {
@@ -45,7 +58,7 @@ export default function BlogPage() {
     }
   };
 
-  if (loading) return <p className="p-4">Loading blog posts...</p>;
+  if (isLoading) return <p className="p-4">Loading blog posts...</p>;
 
   return (
     <div className="p-6 max-w-3xl mx-auto space-y-6">
@@ -88,7 +101,7 @@ export default function BlogPage() {
       <ul className="space-y-4">
         {posts.map((post) => (
           <li key={post.slug} className="p-4 border rounded-lg bg-card">
-            <Link href={`/blog/${post.slug}`}>
+            <Link href={`/blogs/${post.slug}`}>
               <h2 className="text-xl font-semibold hover:underline">
                 {post.title}
               </h2>
