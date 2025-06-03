@@ -68,7 +68,7 @@ export default function ManageProjects() {
       <ul className="space-y-4">
         {projects.map((project) => (
           <li key={project.id} className="p-4 border rounded-md bg-card">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-start">
               <div>
                 <h2 className="text-xl font-semibold">{project.title}</h2>
                 <p className="text-sm text-muted-foreground">

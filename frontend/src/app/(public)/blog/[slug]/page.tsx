@@ -2,6 +2,12 @@
 
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
+import rehypeSanitize from "rehype-sanitize";
+import Markdown from "react-markdown";
+import rehypeHighlight from "rehype-highlight";
+import "highlight.js/styles/github.css";
 
 type BlogPost = {
   slug: string;
@@ -31,12 +37,15 @@ export default function BlogPostPage() {
   return (
     <div className="max-w-3xl mx-auto p-6 space-y-4">
       <h1 className="text-3xl font-bold">{blogPost.title}</h1>
-      <time className="text-sm text-muted-foreground">
+      <div className="text-sm text-muted-foreground">
         {new Date(blogPost.published_at).toLocaleDateString()}
-      </time>
-      <article className="prose dark:prose-invert max-w-none">
+      </div>
+      <Markdown
+        rehypePlugins={[rehypeHighlight, rehypeRaw, rehypeSanitize]}
+        remarkPlugins={[remarkGfm]}
+      >
         {blogPost.content}
-      </article>
+      </Markdown>
     </div>
   );
 }
