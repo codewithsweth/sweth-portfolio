@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "./button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader } from "./dialog";
+import { Dialog, DialogContent, DialogFooter, DialogTitle } from "./dialog";
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -19,7 +19,7 @@ export default function ConfirmDialog({
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent>
-        <DialogHeader>{title}</DialogHeader>
+        <DialogTitle>{title}</DialogTitle>
         <DialogFooter>
           <Button variant={"ghost"} onClick={onClose}>
             Cancel
