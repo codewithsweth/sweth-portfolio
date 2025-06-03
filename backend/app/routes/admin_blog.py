@@ -22,6 +22,9 @@ def get_blog(blog_id: int, db: Session = Depends(get_db), _admin: dict = Depends
 @router.post('/', response_model=BlogOutput, status_code=status.HTTP_201_CREATED)
 def create_blog(post: BlogCreate, db: Session = Depends(get_db), _admin: dict = Depends(get_current_admin)):
     published_at = datetime.now() if post.published else None
+    existing_blog = db.query(Blog).filter(Blog.slug == post.slug).first()
+    if existing_blog:
+        raise HTTPException(status_code=400, detail="Blog with this slug already exists")
 
     new_blog = Blog(**post.model_dump(), published_at=published_at)
 

@@ -2,6 +2,7 @@
 
 import BlogForm from "@/components/admin/BlogForm";
 import API from "@/lib/axios";
+import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
@@ -30,7 +31,10 @@ export default function AddBlogPage() {
         router.push("/admin/blogs");
       }
     } catch (error) {
-      toast.error("Failed to add blog", error);
+      const axiosError = error as AxiosError<{ detail: string }>;
+      if (axiosError.response?.status === 400) {
+        toast.error("Failed to add blog: " + axiosError.response.data.detail);
+      }
     } finally {
       //
     }

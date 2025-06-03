@@ -2,6 +2,7 @@
 
 import BlogForm from "@/components/admin/BlogForm";
 import API from "@/lib/axios";
+import { AxiosError } from "axios";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -35,28 +36,36 @@ export default function EditBlogPage() {
         router.push("/admin/blogs");
       }
     } catch (error) {
-      toast.error("Failed to add blog", error);
-    } finally {
-      //
-    }
-  };
-
-  const fetchBlog = async () => {
-    try {
-      const response = await API.get(`/admin/blogs/${blogId}`);
-      if (response.status === 200) {
-        setInitialData(response.data);
+      const axiosError = error as AxiosError<{ detail: string }>;
+      if (axiosError.response?.status === 404) {
+        toast.error(
+          "Error deleting project: " + axiosError.response.data.detail
+        );
       }
-    } catch (error) {
-      toast.error("Failed to add blog", error);
     } finally {
       //
     }
   };
 
   useEffect(() => {
+    const fetchBlog = async () => {
+      try {
+        const response = await API.get(`/admin/blogs/${blogId}`);
+        if (response.status === 200) {
+          setInitialData(response.data);
+        }
+      } catch (error) {
+        const axiosError = error as AxiosError<{ detail: string }>;
+        toast.error(
+          "Failed to add blog: " + axiosError.response?.data.detail ||
+            "Unknown error"
+        );
+      } finally {
+        //
+      }
+    };
     fetchBlog();
-  }, []);
+  }, [blogId]);
 
   return (
     <div className="max-w-2xl mx-auto p-6 space-y-6">
