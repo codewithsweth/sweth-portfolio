@@ -22,9 +22,16 @@ export default function AdminLoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    const params = new URLSearchParams();
+    params.append("username", form.email);
+    params.append("password", form.password);
 
     try {
-      const response = await API.post("/auth/login", form);
+      const response = await API.post("/auth/login", params, {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      });
       if (response.status === 200) {
         localStorage.setItem("token", response.data.access_token);
         router.push("/admin");
