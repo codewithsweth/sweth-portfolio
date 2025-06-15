@@ -1,3 +1,6 @@
+# Public Blog Routes
+# This module defines the public-facing endpoints to access blog content.
+
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from app.schemas.blog import BlogOutput
@@ -9,10 +12,12 @@ router = APIRouter(prefix="/blogs", tags=["Blog"])
 
 @router.get("/", response_model=list[BlogOutput])
 def get_blog_list(db: Session = Depends(get_db)):
+    """ Fetches a list of published blogs, ordered by published date descending. """
     return db.query(Blog).filter(Blog.published == True).order_by(Blog.published_at.desc()).all()
 
 @router.get("/{slug}", response_model=BlogOutput)
 def get_blog(slug: str, db: Session = Depends(get_db)):
+    """ Fetches a single blog by its slug. Returns 404 if not found or not published. """
     blog = db.query(Blog).filter(Blog.published == True).filter(Blog.slug == slug).first()
     if not blog:
         raise HTTPException(status_code=404, detail="Blog not found")

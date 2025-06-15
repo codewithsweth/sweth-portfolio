@@ -1,3 +1,5 @@
+# Blog schemas for creating, updating, and outputting blog posts
+
 from pydantic import BaseModel
 from datetime import datetime
 
@@ -20,4 +22,4 @@ class BlogOutput(BlogPost):
     published_at: datetime | None = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
